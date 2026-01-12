@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>الدردشة الذكية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Tahoma, Arial;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .chat-box {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
+    }
+    .chat-header {
+      background: #2c7be5;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .msg {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+    .user {
+      background: #e3f2fd;
+      align-self: flex-start;
+    }
+    .bot {
+      background: #e8f5e9;
+      align-self: flex-end;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+    }
+    input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 15px;
+      background: #2c7be5;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-box">
+  <div class="chat-header">💬 المساعد الذكي</div>
+
+  <div class="chat-messages" id="messages">
+    <div class="msg bot">مرحبا 👋 اسألني أي شيء</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="اكتب سؤالك هنا..." />
+    <button onclick="sendMessage()">إرسال</button>
+  </div>
+</div>
+
+<script>
+  const messages = document.getElementById("messages");
+
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.className = "msg " + sender;
+    div.innerText = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    addMessage("⏳ أفكر...", "bot");
+
+    try {
+      const response = await fetch("PUT_YOUR_N8N_WEBHOOK_HERE", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await response.json();
+      messages.lastChild.remove();
+      addMessage(data.reply || "صار مشكل، عاود جرب", "bot");
+
+    } catch (e) {
+      messages.lastChild.remove();
+      addMessage("⚠️ خطأ في الاتصال", "bot");
+    }
+  }
+</script>
+
+</body>
+  </html>
